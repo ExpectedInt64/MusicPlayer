@@ -28,13 +28,34 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
+            this.combatButton = new System.Windows.Forms.Button();
+            this.SuspendLayout();
+            // 
+            // combatButton
+            // 
+            this.combatButton.Location = new System.Drawing.Point(13, 13);
+            this.combatButton.Name = "combatButton";
+            this.combatButton.Size = new System.Drawing.Size(75, 23);
+            this.combatButton.TabIndex = 0;
+            this.combatButton.Text = "Combat";
+            this.combatButton.UseVisualStyleBackColor = true;
+            this.combatButton.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // Form1
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.combatButton);
+            this.Name = "Form1";
             this.Text = "Form1";
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.Button combatButton;
     }
 }
 
