@@ -11,27 +11,109 @@ namespace MusicPlayer
     {
 
 
-        WindowsMediaPlayer Player = new WindowsMediaPlayer();
+        WindowsMediaPlayer player;
         public Form1()
         {
             InitializeComponent();
+            trackBar1.Maximum = 100;
+            player = new WindowsMediaPlayer();
+            player.PlayStateChange += new _WMPOCXEvents_PlayStateChangeEventHandler(player_PlayStateChange);
+            player.settings.setMode("loop", true);
+            trackBar1.TickFrequency = 5;
+            trackBar1.LargeChange = 3;
+            trackBar1.SmallChange = 1;
+            trackBar1.Value = 100;
+            textBox_Volume.Text = "Volume: "+trackBar1.Value;
+            textBox_nowPlaying.Text = "Nothing";
+
+
+        }
+
+        void player_PlayStateChange(int NewState)
+        { if(NewState == 3)
+            {
+                timer1.Start();
+            }
+            else
+            {
+                timer1.Stop();
+            }
+            switch (NewState)
+            {
+                case 0:    // Undefined
+                    textBox_Status.Text = "Undefined";
+                    break;
+
+                case 1:    // Stopped
+                    textBox_Status.Text = "Stopped";
+                    break;
+
+                case 2:    // Paused
+                    textBox_Status.Text = "Paused";
+                    break;
+
+                case 3:    // Playing
+                    textBox_Status.Text = "Playing";
+                    textBox_nowPlaying.Text = player.currentMedia.name;
+                    break;
+
+                case 4:    // ScanForward
+                    textBox_Status.Text = "ScanForward";
+                    break;
+
+                case 5:    // ScanReverse
+                    textBox_Status.Text = "ScanReverse";
+                    break;
+
+                case 6:    // Buffering
+                    textBox_Status.Text = "Buffering";
+                    break;
+
+                case 7:    // Waiting
+                    textBox_Status.Text = "Waiting";
+                    break;
+
+                case 8:    // MediaEnded
+                    textBox_Status.Text = "MediaEnded";
+                    break;
+
+                case 9:    // Transitioning
+                    textBox_Status.Text = "Transitioning";
+                    break;
+
+                case 10:   // Ready
+                    textBox_Status.Text = "Ready";
+                    break;
+
+                case 11:   // Reconnecting
+                    textBox_Status.Text = "Reconnecting";
+                    break;
+
+                case 12:   // Last
+                    textBox_Status.Text = "Last";
+                    break;
+
+                default:
+                    textBox_Status.Text = ("Unknown State: " + NewState.ToString());
+                    break;
+            }
         }
 
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Player.controls.stop();
-            Player.currentPlaylist = InitializePlayList("combat");
-            Player.controls.play();
+            player.controls.stop();
+            player.currentPlaylist = InitializePlayList("combat");
+            player.controls.play();
         }
 
         private IWMPPlaylist InitializePlayList(String type)
         {
             List<string> playListData = LoadMusic("combat");
-            IWMPPlaylist playlist = Player.playlistCollection.newPlaylist("combat");
+            IWMPPlaylist playlist = player.playlistCollection.newPlaylist("combat");
             foreach (String file in playListData)
             {
-                IWMPMedia fileMedia = Player.newMedia(file);
+                IWMPMedia fileMedia = player.newMedia(file);
                 playlist.appendItem(fileMedia);
             }
             return playlist;
@@ -76,6 +158,45 @@ namespace MusicPlayer
 
             //return StringList[Rnd.Next(0, StringList.Length - 1)];
             return List;
+        }
+
+        private void trackBar1_Scroll(object sender, EventArgs e)
+        {
+            textBox_Volume.Text = "Volume: " + trackBar1.Value;
+            player.settings.volume = trackBar1.Value;
+        }
+
+        private void button_Pause_Click(object sender, EventArgs e)
+        {
+            if(player.playState == WMPPlayState.wmppsPaused)
+            {
+                player.controls.play();
+                button_Pause.Text = "Pause";
+            }
+            else
+            {
+                player.controls.pause();
+                button_Pause.Text = "Resume";
+            }
+        }
+
+        private void button_Prev_Click(object sender, EventArgs e)
+        {
+            player.controls.previous();
+            player.controls.play();
+        }
+
+        private void button_Next_Click(object sender, EventArgs e)
+        {
+            player.controls.next();
+            player.controls.play();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            double percent = 0;
+                percent = ((double)player.controls.currentPosition / player.controls.currentItem.duration);
+            progressBar1.Value = (int)(percent * progressBar1.Maximum);
         }
     }
 
