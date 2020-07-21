@@ -14,6 +14,7 @@ namespace MusicPlayer
         WindowsMediaPlayer player;
         public Form1()
         {
+            int player_volume = 20;
             InitializeComponent();
             trackBar1.Maximum = 100;
             player = new WindowsMediaPlayer();
@@ -22,7 +23,8 @@ namespace MusicPlayer
             trackBar1.TickFrequency = 5;
             trackBar1.LargeChange = 3;
             trackBar1.SmallChange = 1;
-            trackBar1.Value = 100;
+            trackBar1.Value = player_volume;
+            player.settings.volume = player_volume;
             textBox_Volume.Text = "Volume: "+trackBar1.Value;
             textBox_nowPlaying.Text = "Nothing";
 
@@ -126,7 +128,8 @@ namespace MusicPlayer
             String[] AllowedExtensions = new String[]
             {
                 ".mp3",
-                ".wav"
+                ".wav",
+                ".flac"
             };
             //Sets path, and gets all files, then adds them to a list
             String PathName = Environment.CurrentDirectory + @"\music\"+folder+@"\";
@@ -195,8 +198,51 @@ namespace MusicPlayer
         private void timer1_Tick(object sender, EventArgs e)
         {
             double percent = 0;
-                percent = ((double)player.controls.currentPosition / player.controls.currentItem.duration);
+            percent = ((double)player.controls.currentPosition / player.controls.currentItem.duration);
             progressBar1.Value = (int)(percent * progressBar1.Maximum);
+        }
+
+
+        private void progressBar1_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (player.playState == WMPPlayState.wmppsReady || player.playState == WMPPlayState.wmppsPlaying || player.playState == WMPPlayState.wmppsPaused)
+                {
+                    updateTrackPosition(getRelativeMouse(e));
+                }
+            }
+            
+        }
+
+        private void progressBar1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                updateTrackPosition(getRelativeMouse(e));
+            }
+        }
+        private float getRelativeMouse(MouseEventArgs e)
+        {
+            // Get mouse position(x) minus the width of the progressbar (so beginning of the progressbar is mousepos = 0 //
+            float absoluteMouse = (PointToClient(MousePosition).X - progressBar1.Bounds.X);
+            // Calculate the factor for converting the position (progbarWidth/100) //
+            float calcFactor = progressBar1.Width / (float)progressBar1.Maximum;
+            // In the end convert the absolute mouse value to a relative mouse value by dividing the absolute mouse by the calcfactor //
+            float relativeMouse = absoluteMouse / calcFactor;
+            // Set the calculated relative value to the progressbar //
+            
+            return relativeMouse;
+            
+        }
+        private float getMusicProgressBar1Pos(float relativeMouse)
+        {
+            return (relativeMouse / 100 * (float)player.controls.currentItem.duration);
+        }
+        private void updateTrackPosition(float relativeMouse)
+        {
+            progressBar1.Value = Convert.ToInt32(relativeMouse);
+            player.controls.currentPosition = Convert.ToInt32(getMusicProgressBar1Pos(relativeMouse));
         }
     }
 
